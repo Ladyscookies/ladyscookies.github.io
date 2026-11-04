@@ -397,8 +397,8 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   const photoHTML = it => it.img&&PHOTOS[it.img] ? `<div class="photo has-img"><img src="${PHOTOS[it.img]}" alt="${it.name} Lady's Cookies" loading="lazy"></div>` : `<div class="photo"><span>${it.name}</span></div>`;
   const BIGGIE_OPTS = ["3 Chocolats","Kinder Maxi","Kinder White","Spéculoos","Raffaello","Chocolat blanc","Chocolat noir fleur de sel","Nutella","Milka","Caramel"];
   const FAMILIES = [
-    {title:"Édition du mois", info:"Novembre · en quantité limitée", items:[
-      {id:"tiramisu", img:"tiramisu", name:"Cookie Tiramisu", meta:"Cookie moelleux aux pépites de chocolat, généreuse crème mascarpone au café et pluie de cacao. Le tiramisu, version cookie.", price:3.5, label:"Parfum", options:["Tiramisu"]}]},
+    {title:"Édition du week-end", info:"Ven. 6, sam. 7 et dim. 8 novembre uniquement", items:[
+      {id:"tiramisu", img:"tiramisu", name:"Cookie Tiramisu", meta:"Cookie moelleux aux pépites de chocolat, généreuse crème mascarpone au café et pluie de cacao. Le tiramisu, version cookie.", price:3.5, label:"Parfum", options:["Tiramisu"], dates:["2026-11-06","2026-11-07","2026-11-08"], warn:"Disponible uniquement ce week-end : vendredi 6, samedi 7 et dimanche 8 novembre."}]},
     {title:"Cookies à la pièce", info:"105 à 125 g", items:[
       {id:"gourmand", img:"gourmand", name:"Cookies gourmands", meta:"", price:3.5, label:"Parfum", options:["Framboise Pistache","Framboise Chocolat Blanc"], warn:"À la framboise : se conserve au réfrigérateur, 2 jours maximum."},
       {id:"biggie", img:"biggie", name:"Biggies", meta:"Épais, fondant, généreux", price:3, label:"Parfum", options:BIGGIE_OPTS}]},
@@ -515,6 +515,17 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     };
   }
 
+  // PRODUITS À DATES LIMITÉES : on ne peut les commander que pour ces dates
+  const todayIso = (()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
+  const DATED = {};
+  const EXPIRED = [];
+  FAMILIES.forEach(f=>{ f.items = f.items.filter(it=>{ const ok=!it.dates || it.dates.some(x=>x>=todayIso); if(!ok) EXPIRED.push(it.id); return ok; }); f.items.forEach(it=>{ if(it.dates) DATED[it.id]=it.dates; }); });
+  for(let i=FAMILIES.length-1;i>=0;i--) if(!FAMILIES[i].items.length) FAMILIES.splice(i,1);
+  const datedOf = c=>DATED[c.key.split("|")[0]];
+  const allowedDates = ()=>{ let a=null; cart.forEach(c=>{const d=datedOf(c); if(d) a = a ? a.filter(x=>d.includes(x)) : d.slice();}); return a; };
+  const datedNames = ()=>[...new Set(cart.filter(datedOf).map(c=>c.name))].join(", ");
+  cart = cart.filter(c=>!EXPIRED.includes(c.key.split("|")[0])); save();
+
   const cat = document.getElementById("catalogue");
   FAMILIES.forEach(f=>{
     const fam = document.createElement("div"); fam.className="family";
@@ -587,7 +598,8 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   // (ex. "2026-10-31": "15:00"). Mettre "complet" pour bloquer toute la journée.
   const COMPLET = {
     "2026-10-31": "15:00",
-    "2026-11-01": "13:00"
+    "2026-11-01": "13:00",
+    "2026-11-04": "complet"
   };
   // LIVRAISONS : pour une date, l'heure à partir de laquelle les livraisons sont possibles
   // (ex. "2026-10-31": "20:00"). "complet" = pas de livraison ce jour-là. Le retrait n'est pas concerné.
@@ -615,7 +627,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     let h=`<div class="cal-head"><button type="button" class="cal-nav" data-d="-1" aria-label="Mois précédent">‹</button><strong>${first.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</strong><button type="button" class="cal-nav" data-d="1" aria-label="Mois suivant">›</button></div><div class="cal-grid">`+["lun","mar","mer","jeu","ven","sam","dim"].map(d=>`<span class="cal-wd">${d}</span>`).join("");
     for(let i=0;i<lead;i++) h+="<span></span>";
     for(let d=1;d<=days;d++){
-      const dt=new Date(y,mo,d), wd=dt.getDay(), v=isoD(dt), off=dt<tom||dt>maxD||wd===1||wd===2||!openSlots(v).length;
+      const dt=new Date(y,mo,d), wd=dt.getDay(), v=isoD(dt), AL=allowedDates(), off=dt<tom||dt>maxD||wd===1||wd===2||(AL&&!AL.includes(v))||!openSlots(v).length;
       h+=`<button type="button" class="cal-day${v===sel?" on":""}" data-v="${v}" ${off?"disabled":""} aria-label="${dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}${off?" (indisponible)":""}">${d}</button>`;
     }
     cal.innerHTML=h+"</div>";
@@ -647,6 +659,10 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     const MIN = mode()==="livraison" ? 10 : 8, mn = $("minNote");
     if(T.sub>0 && T.sub<MIN){ mn.textContent = "Minimum "+MIN+" € "+(mode()==="livraison"?"en livraison":"en retrait")+" : encore "+eur(MIN-T.sub)+" à ajouter."; mn.classList.add("warn"); }
     else { mn.textContent = "Minimum de commande : 8 € en retrait, 10 € en livraison."; mn.classList.remove("warn"); }
+    const AL = allowedDates();
+    if(AL && $("date").value && !AL.includes($("date").value)){ $("date").value=""; $("heure").innerHTML='<option value="">Choisis une heure</option>'; $("heure").disabled=true; }
+    if(AL && AL.length){ const v0=new Date(AL.find(x=>x>=todayIso)||AL[0]); if(!$("date").value) view=new Date(v0.getFullYear(),v0.getMonth(),1); }
+    if(typeof view!=="undefined") drawCal();
   }
   render();
 
@@ -676,6 +692,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     else if(!/^0[67]\d{8}$/.test(tel.replace(/\D/g,""))) miss.push("un numéro de portable valide (06 ou 07, 10 chiffres)");
     if(mode()==="livraison" && !$("adresse").value.trim()) miss.push("ton adresse de livraison");
     if(!$("date").value) miss.push("la date souhaitée");
+    else if(allowedDates() && !allowedDates().includes($("date").value)){ err.textContent=datedNames()+" : disponible uniquement le vendredi 6, samedi 7 et dimanche 8 novembre. Choisis une de ces dates ou retire-le du panier."; err.hidden=false; return; }
     else {
       const wd = new Date($("date").value+"T12:00:00").getDay();
       const h = $("heure").value;
