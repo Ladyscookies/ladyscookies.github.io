@@ -316,6 +316,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
               <label><input type="radio" name="pay" value="Virement"> Virement</label>
               <label><input type="radio" name="pay" value="PayPal"> PayPal</label>
             </div>
+            <p class="lead-note" id="cardNote" hidden>Paiement par carte bancaire indisponible pour cette date : espèces, virement ou PayPal.</p>
             <p class="lead-note" id="cashNote" hidden>Paiement en espèces : merci de prévoir l'appoint 🤎</p>
           </div>
           <div class="field"><label for="noteClient">Une précision ?</label><textarea id="noteClient" rows="3" placeholder="Parfums des Mini Cookies, Tarte Cookie…"></textarea></div>
@@ -624,7 +625,17 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     let s=slots(d.getDay(), iso); if(l && s.length && l>s[0] && l<=s[s.length-1] && !s.includes(l)) s=[...s,l].sort();
     return s.filter(x=>new Date(iso+"T"+x+":00").getTime()>=limit && (!c || x>=c) && (!l || x>=l));
   }
+  // DATES SANS PAIEMENT PAR CARTE
+  const CARTE_OFF = ["2026-11-10"];
+  function payCheck(){
+    const off = CARTE_OFF.includes($("date").value), c = document.querySelector('input[name="pay"][value="Carte bancaire"]');
+    if(!c) return;
+    c.disabled = off; c.parentElement.style.opacity = off ? ".4" : "";
+    if(off && c.checked) c.checked = false;
+    $("cardNote").hidden = !off;
+  }
   function fillSlots(){
+    payCheck();
     const v=$("date").value, sel=$("heure");
     if(!v){ sel.disabled=true; return; }
     const wd=new Date(v+"T12:00:00").getDay();
@@ -711,6 +722,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     }
     if(!$("heure").value) miss.push("l'heure souhaitée");
     if(!payVal()) miss.push("le moyen de paiement");
+    else if(payVal()==="Carte bancaire" && CARTE_OFF.includes($("date").value)){ err.textContent="Le paiement par carte bancaire n'est pas disponible pour cette date. Choisis espèces, virement ou PayPal."; err.hidden=false; return; }
     else if($("date").value && new Date($("date").value+"T"+$("heure").value+":00").getTime() < Date.now()+LEAD*60000){
       err.textContent="Il faut commander au minimum 2h30 à l'avance. Choisis un créneau plus tard."; err.hidden=false; drawCal(); fillSlots(); return;
     }
