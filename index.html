@@ -362,8 +362,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
         <div><h3>Retrait</h3><p>À Boissy-Saint-Léger. L'adresse exacte et le créneau te sont confirmés avec ta commande.</p></div>
         <div><h3>Livraison</h3>
           <table>
-            <tr><td>Boissy, Limeil-Brévannes, Créteil, Villeneuve-Saint-Georges, Valenton</td><td>5 €</td></tr>
-            <tr><td>Autres villes du Val-de-Marne</td><td>7 €</td></tr>
+            <tr><td>Toutes les villes du Val-de-Marne (94)</td><td>Offerte</td></tr>
             <tr><td>Hors 94</td><td>Sur demande</td></tr>
           </table>
         </div>
@@ -570,12 +569,12 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   });
 
   const ZONES = [
-    {v:"Boissy-Saint-Léger",fee:5},{v:"Limeil-Brévannes",fee:5},{v:"Créteil",fee:5},{v:"Villeneuve-Saint-Georges",fee:5},{v:"Valenton",fee:5},
-    {v:"Autre ville du Val-de-Marne (94)",fee:7},{v:"Hors Val-de-Marne",fee:null}
+    {v:"Boissy-Saint-Léger",fee:0},{v:"Limeil-Brévannes",fee:0},{v:"Créteil",fee:0},{v:"Villeneuve-Saint-Georges",fee:0},{v:"Valenton",fee:0},
+    {v:"Autre ville du Val-de-Marne (94)",fee:0},{v:"Hors Val-de-Marne",fee:null}
   ];
   const $ = id=>document.getElementById(id);
   const ville = $("ville");
-  ville.innerHTML = ZONES.map((z,i)=>`<option value="${i}">${z.v}${z.fee!=null?" · "+z.fee+" €":" · sur demande"}</option>`).join("");
+  ville.innerHTML = ZONES.map((z,i)=>`<option value="${i}">${z.v}${z.fee===0?" · livraison offerte":z.fee!=null?" · "+z.fee+" €":" · sur demande"}</option>`).join("");
   const mode = ()=>document.querySelector('input[name="mode"]:checked').value;
   document.querySelectorAll('input[name="mode"]').forEach(r=>r.onchange=()=>{
     $("livraisonFields").hidden = mode()!=="livraison"; $("retraitNote").hidden = mode()==="livraison"; render(); if(typeof drawCal==="function"){ drawCal(); fillSlots(); }
@@ -663,7 +662,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   function totals(){
     const sub = cart.reduce((s,c)=>s+c.price*c.qty,0);
     let fee=0, feeTxt="Gratuit";
-    if(mode()==="livraison"){ const z=ZONES[+ville.value]; if(z.fee==null){feeTxt="Sur demande"} else {fee=z.fee;feeTxt=eur(z.fee)} }
+    if(mode()==="livraison"){ const z=ZONES[+ville.value]; if(z.fee==null){feeTxt="Sur demande"} else if(z.fee===0){feeTxt="Offerte"} else {fee=z.fee;feeTxt=eur(z.fee)} }
     return {sub,fee,feeTxt,total:sub+fee};
   }
 
