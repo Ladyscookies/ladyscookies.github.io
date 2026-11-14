@@ -362,7 +362,8 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
         <div><h3>Retrait</h3><p>À Boissy-Saint-Léger. L'adresse exacte et le créneau te sont confirmés avec ta commande.</p></div>
         <div><h3>Livraison</h3>
           <table>
-            <tr><td>Toutes les villes du Val-de-Marne (94)</td><td>Offerte</td></tr>
+            <tr><td>Boissy, Limeil-Brévannes, Créteil, Villeneuve-Saint-Georges, Valenton</td><td>5 €</td></tr>
+            <tr><td>Autres villes du Val-de-Marne</td><td>7 €</td></tr>
             <tr><td>Hors 94</td><td>Sur demande</td></tr>
           </table>
         </div>
@@ -569,15 +570,15 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   });
 
   const ZONES = [
-    {v:"Boissy-Saint-Léger",fee:0,paid:5},{v:"Limeil-Brévannes",fee:0,paid:5},{v:"Créteil",fee:0,paid:5},{v:"Villeneuve-Saint-Georges",fee:0,paid:5},{v:"Valenton",fee:0,paid:5},
-    {v:"Autre ville du Val-de-Marne (94)",fee:0,paid:7},{v:"Hors Val-de-Marne",fee:null}
+    {v:"Boissy-Saint-Léger",fee:5},{v:"Limeil-Brévannes",fee:5},{v:"Créteil",fee:5},{v:"Villeneuve-Saint-Georges",fee:5},{v:"Valenton",fee:5},
+    {v:"Autre ville du Val-de-Marne (94)",fee:7},{v:"Hors Val-de-Marne",fee:null}
   ];
   const $ = id=>document.getElementById(id);
   const ville = $("ville");
-  // DATES OÙ LA LIVRAISON EST PAYANTE (anciens tarifs : 5 € / 7 €)
-  const LIVRAISON_PAYANTE = ["2026-11-14"];
+  // DATES OÙ LA LIVRAISON EST OFFERTE (ex. "2026-11-13")
+  const LIVRAISON_OFFERTE = [];
   const todayIsoF = ()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-  const feeOf = z=>{ if(z.fee==null) return null; const d=($("date")&&$("date").value)||todayIsoF(); return LIVRAISON_PAYANTE.includes(d) && z.paid!=null ? z.paid : z.fee; };
+  const feeOf = z=>{ if(z.fee==null) return null; const d=($("date")&&$("date").value)||todayIsoF(); return LIVRAISON_OFFERTE.includes(d) ? 0 : z.fee; };
   function fillVilles(){
     const cur = ville.value;
     ville.innerHTML = ZONES.map((z,i)=>{ const f=feeOf(z); return `<option value="${i}">${z.v}${f===0?" · livraison offerte":f!=null?" · "+f+" €":" · sur demande"}</option>`; }).join("");
