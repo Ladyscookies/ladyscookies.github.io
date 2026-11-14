@@ -592,7 +592,8 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   // JOURS D'OUVERTURE EXCEPTIONNELS (un lundi ou un mardi) : date -> [première heure, dernière heure]
   const OUVERT = {
     "2026-11-10": ["20:30","23:00"],
-    "2026-11-11": ["16:00","23:00"]
+    "2026-11-11": ["16:00","23:00"],
+    "2026-11-14": ["09:00","24:00"]
   };
   function slots(wd, iso){
     let s,e; const X = iso && OUVERT[iso];
@@ -620,12 +621,14 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     "2026-10-31": "20:45",
     "2026-11-01": "19:00"
   };
+  const slotTime = (iso,x)=>{ const [d,m,y]=[+iso.slice(8,10),+iso.slice(5,7)-1,+iso.slice(0,4)]; return new Date(y,m,d,+x.slice(0,2),+x.slice(3,5)).getTime(); };
+  const slotLabel = x=> x==="24:00" ? "Minuit" : x.replace(":","h");
   function openSlots(iso){
     const d=new Date(iso+"T12:00:00"), limit=Date.now()+LEAD*60000, c=COMPLET[iso];
     const l = mode()==="livraison" ? LIVRAISON_DES[iso] : null;
     if(c==="complet" || l==="complet") return [];
     let s=slots(d.getDay(), iso); if(l && s.length && l>s[0] && l<=s[s.length-1] && !s.includes(l)) s=[...s,l].sort();
-    return s.filter(x=>new Date(iso+"T"+x+":00").getTime()>=limit && (!c || x>=c) && (!l || x>=l));
+    return s.filter(x=>slotTime(iso,x)>=limit && (!c || x>=c) && (!l || x>=l));
   }
   // DATES SANS PAIEMENT PAR CARTE
   const CARTE_OFF = ["2026-11-10"];
@@ -641,7 +644,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     const v=$("date").value, sel=$("heure");
     if(!v){ sel.disabled=true; return; }
     const wd=new Date(v+"T12:00:00").getDay();
-    sel.innerHTML='<option value="">Choisis une heure</option>'+openSlots(v).map(x=>`<option value="${x}">${x.replace(":","h")}</option>`).join("");
+    sel.innerHTML='<option value="">Choisis une heure</option>'+openSlots(v).map(x=>`<option value="${x}">${slotLabel(x)}</option>`).join("");
     sel.disabled=false;
   }
   function drawCal(){
@@ -725,7 +728,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     if(!$("heure").value) miss.push("l'heure souhaitée");
     if(!payVal()) miss.push("le moyen de paiement");
     else if(payVal()==="Carte bancaire" && CARTE_OFF.includes($("date").value)){ err.textContent="Le paiement par carte bancaire n'est pas disponible pour cette date. Choisis espèces, virement ou PayPal."; err.hidden=false; return; }
-    else if($("date").value && new Date($("date").value+"T"+$("heure").value+":00").getTime() < Date.now()+LEAD*60000){
+    else if($("date").value && slotTime($("date").value,$("heure").value) < Date.now()+LEAD*60000){
       err.textContent="Il faut commander au minimum 2h30 à l'avance. Choisis un créneau plus tard."; err.hidden=false; drawCal(); fillSlots(); return;
     }
     if(miss.length){ err.textContent="Il manque : "+miss.join(", ")+"."; err.hidden=false; return; }
@@ -744,7 +747,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
       adresse: livraison?$("adresse").value.trim():"",
       frais_livraison: livraison?T.feeTxt:"0",
       sous_total: T.sub.toFixed(2).replace(".",","), total: T.total.toFixed(2).replace(".",","),
-      date: $("date").value.split("-").reverse().join("/"), heure: $("heure").value||"",
+      date: $("date").value.split("-").reverse().join("/"), heure: $("heure").value==="24:00" ? "Minuit" : ($("heure").value||""),
       paiement: payVal(),
       precision: ["Paiement : "+payVal()+(payVal()==="Espèces"?" (prévoir l'appoint)":""), $("noteClient").value.trim()].filter(Boolean).join(" · "), statut:"En attente de validation",
       envoyee_le: new Date().toLocaleString("fr-FR")
