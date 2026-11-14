@@ -593,7 +593,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
   const OUVERT = {
     "2026-11-10": ["20:30","23:00"],
     "2026-11-11": ["16:00","23:00"],
-    "2026-11-14": ["09:00","24:00"]
+    "2026-11-14": ["09:00","26:00"]
   };
   function slots(wd, iso){
     let s,e; const X = iso && OUVERT[iso];
@@ -622,7 +622,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     "2026-11-01": "19:00"
   };
   const slotTime = (iso,x)=>{ const [d,m,y]=[+iso.slice(8,10),+iso.slice(5,7)-1,+iso.slice(0,4)]; return new Date(y,m,d,+x.slice(0,2),+x.slice(3,5)).getTime(); };
-  const slotLabel = x=> x==="24:00" ? "Minuit" : x.replace(":","h");
+  const slotLabel = x=>{ const h=+x.slice(0,2); if(x==="24:00") return "Minuit"; if(h>=24) return (h-24)+"h"+x.slice(3)+" (nuit)"; return x.replace(":","h"); };
   function openSlots(iso){
     const d=new Date(iso+"T12:00:00"), limit=Date.now()+LEAD*60000, c=COMPLET[iso];
     const l = mode()==="livraison" ? LIVRAISON_DES[iso] : null;
@@ -747,7 +747,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
       adresse: livraison?$("adresse").value.trim():"",
       frais_livraison: livraison?T.feeTxt:"0",
       sous_total: T.sub.toFixed(2).replace(".",","), total: T.total.toFixed(2).replace(".",","),
-      date: $("date").value.split("-").reverse().join("/"), heure: $("heure").value==="24:00" ? "Minuit" : ($("heure").value||""),
+      date: $("date").value.split("-").reverse().join("/"), heure: +$("heure").value.slice(0,2)>=24 ? slotLabel($("heure").value) : ($("heure").value||""),
       paiement: payVal(),
       precision: ["Paiement : "+payVal()+(payVal()==="Espèces"?" (prévoir l'appoint)":""), $("noteClient").value.trim()].filter(Boolean).join(" · "), statut:"En attente de validation",
       envoyee_le: new Date().toLocaleString("fr-FR")
