@@ -39,6 +39,16 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#6E1F2F">
 <title>Lady's Cookies</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Lady's Cookies">
+<meta property="og:title" content="Lady's Cookies · La gourmandise dans toute sa douceur">
+<meta property="og:description" content="Cookies faits maison à Boissy-Saint-Léger. Commande en ligne, retrait ou livraison.">
+<meta property="og:url" content="https://ladyscookies.fr/">
+<meta property="og:image" content="https://ladyscookies.fr/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ladyscookies.fr/og-image.jpg">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,6 +127,8 @@ section{padding-block:72px}
 .soldout{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:6px 14px;background:var(--accent-fg);color:var(--accent);text-align:center;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .soldout strong{font-family:var(--serif);font-size:1.6rem;font-weight:700;line-height:1}
 .soldout span{font-family:var(--serif);font-style:italic;font-size:1rem}
+.ville-help{display:block;margin-top:6px;font-size:.85rem;color:var(--muted);line-height:1.4}
+.ville-help a{color:inherit;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 /* Pop-up nouveauté */
 .promo-bg{position:fixed;inset:0;z-index:90;background:rgba(26,11,14,.55);display:grid;place-items:center;padding:16px;opacity:0;transition:opacity .35s ease}
 .promo-bg.show{opacity:1}
@@ -352,7 +364,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
             </div>
           </div>
           <div id="livraisonFields" hidden style="display:grid;gap:14px">
-            <div class="field"><label for="ville">Ville</label><select id="ville"></select></div>
+            <div class="field"><label for="ville">Ville</label><select id="ville"></select><small class="ville-help">Ta ville n'est pas dans la liste ? Appelle ou envoie un SMS au <a href="tel:+33621374392">06 21 37 43 92</a>.</small></div>
             <div class="field"><label for="adresse">Adresse complète</label><input id="adresse" autocomplete="street-address" placeholder="12 rue des Lilas, 94000 Créteil"></div>
           </div>
           <p class="note" id="retraitNote">L'adresse exacte du retrait à Boissy-Saint-Léger t'est communiquée à la confirmation.</p>
@@ -415,7 +427,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
         <div><h3>Livraison</h3>
           <table>
             <tr><td>Limeil-Brévannes, Créteil, Villeneuve-Saint-Georges, Valenton</td><td>5 €</td></tr>
-            <tr><td>Autres villes du Val-de-Marne</td><td>7 €</td></tr>
+            <tr><td>Autres villes du Val-de-Marne (hors Boissy : retrait)</td><td>7 €</td></tr>
             <tr><td>Villecresnes, Montgeron, Crosne</td><td>7 €</td></tr>
             <tr><td>Vigneux-sur-Seine, Servon, Brie-Comte-Robert</td><td>10 €</td></tr>
           </table>
@@ -628,7 +640,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
 
   const ZONES = [
     {g:"Val-de-Marne (94)",v:"Limeil-Brévannes",fee:5},{g:"Val-de-Marne (94)",v:"Créteil",fee:5},{g:"Val-de-Marne (94)",v:"Villeneuve-Saint-Georges",fee:5},{g:"Val-de-Marne (94)",v:"Valenton",fee:5},
-    {g:"Val-de-Marne (94)",v:"Autre ville du Val-de-Marne (94)",fee:7},
+    {g:"Val-de-Marne (94)",v:"Autre ville du 94 (hors Boissy)",fee:7},
     {g:"Val-de-Marne (94)",v:"Villecresnes",fee:7},
     {g:"Essonne (91)",v:"Montgeron",fee:7},{g:"Essonne (91)",v:"Crosne",fee:7},{g:"Essonne (91)",v:"Vigneux-sur-Seine",fee:10},
     {g:"Seine-et-Marne (77)",v:"Servon",fee:10},{g:"Seine-et-Marne (77)",v:"Brie-Comte-Robert",fee:10}
