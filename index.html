@@ -480,9 +480,9 @@ footer a:hover{text-decoration:underline;text-underline-offset:5px}
     {title:"Hot Cookies", info:"200 g · à déguster chaud", items:[
       {id:"hot", img:"hot", name:"Hot Cookie", meta:"Le grand format, à réchauffer", price:8.5, label:"Parfum", options:["Snickers","Kinder Maxi","Kinder White","Pistache"]}]},
     {title:"Tarte Cookie", info:"20 cm · 8 parts", items:[
-      {id:"tarte", img:"tarte", name:"Tarte Cookie", meta:"Compose ta tarte avec tes parfums préférés", price:22, box:8, unit:"parts", mix:true, off:["2026-11-26"],
+      {id:"tarte", img:"tarte", name:"Tarte Cookie", meta:"Compose ta tarte avec tes parfums préférés", price:22, box:8, unit:"parts", mix:true, off:["2026-11-26","2026-11-27"],
        options:["Pistache","Pistache chocolat blanc","Kinder White","Spéculoos","Raffaello","Nutella","Framboise Pistache","Framboise Chocolat Blanc","Framboise Raffaello","Caramel"],
-       warn:(new Date().toLocaleDateString("fr-CA")==="2026-11-26"?"En rupture ce soir (jeudi 26 novembre), disponible à partir de demain. ":"")+"Avec de la framboise : se conserve au réfrigérateur, 2 jours maximum."}]}
+       warn:({"2026-11-26":"En rupture ce soir et demain (jeudi 26 et vendredi 27 novembre), disponible à partir de samedi 28. ","2026-11-27":"En rupture ce soir (vendredi 27 novembre), disponible à partir de demain samedi. "}[new Date().toLocaleDateString("fr-CA")]||"")+"Avec de la framboise : se conserve au réfrigérateur, 2 jours maximum."}]}
   ];
 
   let cart = [];
